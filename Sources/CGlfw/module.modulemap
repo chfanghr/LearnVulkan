@@ -1,0 +1,5 @@
+module CGlfw {
+    umbrella header "shim.h"
+    link "glfw"
+    export *
+}

@@ -1,28 +1,46 @@
 // swift-tools-version:5.3
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "LearnVulkan",
     products: [
-        // Products define the executables and libraries a package produces, and make them visible to other packages.
-        .library(
-            name: "LearnVulkan",
-            targets: ["LearnVulkan"]),
+        .executable(name: "SetupEnvironment", targets: ["SetupEnvironment"]),
+        .executable(name: "HelloTriangle", targets: ["HelloTriangle"]),
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages this package depends on.
-        .target(
-            name: "LearnVulkan",
-            dependencies: []),
-        .testTarget(
-            name: "LearnVulkanTests",
-            dependencies: ["LearnVulkan"]),
+        .target(name: "SetupEnvironment", dependencies: [
+            .target(name: "CVulkan"),
+            .target(name: "CGlfw"),
+        ]),
+
+        .target(name: "HelloTriangle", dependencies: [
+            .target(name: "CVulkan"),
+            .target(name: "CGlfw"),
+            .target(name: "CVulkanDebug"),
+            .target(name: "Utilities"),
+        ], exclude: [
+            "Shaders/shader.frag",
+            "Shaders/shader.vert",
+        ], resources: [
+            .copy("Resources/frag.spv"),
+            .copy("Resources/vert.spv"),
+        ], swiftSettings: [
+            .define("DEBUG", .when(configuration: .debug)),
+        ]),
+
+        .target(name: "CVulkanDebug", dependencies: [
+            .target(name: "CVulkan"),
+        ]),
+
+        .target(name: "Utilities"),
+
+        .systemLibrary(name: "CVulkan", pkgConfig: "vulkan"),
+        .systemLibrary(name: "CGlfw", pkgConfig: "glfw3", providers: [
+            .brew(["glfw"]),
+            .apt(["glfw3", "xorg-dev", "libglu1-mesa-dev"]),
+        ]),
     ]
 )
